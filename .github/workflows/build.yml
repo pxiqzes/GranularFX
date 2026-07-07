@@ -38,6 +38,33 @@ jobs:
       - name: Build (Release)
         run: cmake --build build --config Release
 
+      - name: Build installer package
+        run: |
+          mkdir -p installer
+          pkgbuild --component build/GranularFX_artefacts/Release/VST3/GRANULARIX.vst3 \
+                    --install-location "/Library/Audio/Plug-Ins/VST3" \
+                    --identifier com.pxiqzes.granularix.vst3 \
+                    --version 1.0 \
+                    installer/VST3.pkg
+          pkgbuild --component build/GranularFX_artefacts/Release/AU/GRANULARIX.component \
+                    --install-location "/Library/Audio/Plug-Ins/Components" \
+                    --identifier com.pxiqzes.granularix.au \
+                    --version 1.0 \
+                    installer/AU.pkg
+          productbuild --synthesize \
+                       --package installer/VST3.pkg \
+                       --package installer/AU.pkg \
+                       installer/distribution.xml
+          productbuild --distribution installer/distribution.xml \
+                       --package-path installer \
+                       GRANULARIX-Installer.pkg
+
+      - name: Upload macOS installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: GRANULARIX-macOS-Installer
+          path: GRANULARIX-Installer.pkg
+
       - name: Upload macOS VST3
         uses: actions/upload-artifact@v4
         with:
