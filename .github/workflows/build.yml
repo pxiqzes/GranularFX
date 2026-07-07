@@ -1,0 +1,51 @@
+name: Build GRANULARIX
+
+# Runs automatically on every push to main, and can also be triggered
+# manually from the "Actions" tab on GitHub.
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -B build
+
+      - name: Build (Release)
+        run: cmake --build build --config Release
+
+      - name: Upload Windows VST3
+        uses: actions/upload-artifact@v4
+        with:
+          name: GRANULARIX-Windows-VST3
+          path: build/GranularFX_artefacts/Release/VST3/GRANULARIX.vst3
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Configure (Xcode generator)
+        run: cmake -B build -G Xcode
+
+      - name: Build (Release)
+        run: cmake --build build --config Release
+
+      - name: Upload macOS VST3
+        uses: actions/upload-artifact@v4
+        with:
+          name: GRANULARIX-macOS-VST3
+          path: build/GranularFX_artefacts/Release/VST3/GRANULARIX.vst3
+
+      - name: Upload macOS AU
+        uses: actions/upload-artifact@v4
+        with:
+          name: GRANULARIX-macOS-AU
+          path: build/GranularFX_artefacts/Release/AU/GRANULARIX.component
